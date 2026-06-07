@@ -27,3 +27,12 @@ CREATE TABLE IF NOT EXISTS transacciones (
     FOREIGN KEY (cuenta_origen_id) REFERENCES cuentas(id),
     FOREIGN KEY (cuenta_destino_id) REFERENCES cuentas(id)
 );
+
+-- Crear índice para acelerar la búsqueda de transacciones enviadas
+CREATE INDEX idx_transacciones_origen ON transacciones(cuenta_origen_id);
+
+-- Crear índice para acelerar la búsqueda de transacciones recibidas
+CREATE INDEX idx_transacciones_destino ON transacciones(cuenta_destino_id);
+
+-- Crear un índice compuesto para ordenar por fecha de forma eficiente
+CREATE INDEX idx_transacciones_fecha ON transacciones(creado_en DESC);
