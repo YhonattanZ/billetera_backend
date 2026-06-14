@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import authRoutes from './routes/auth.routes';
 
 export class Server {
   private app: Application;
@@ -17,6 +18,8 @@ export class Server {
   }
 
   private routes() {
+    
+    this.app.use('/api/auth', authRoutes);
     // Endpoint de salud mudado a su capa correspondiente
     this.app.get('/api/health', (req, res) => {
       res.status(200).json({
