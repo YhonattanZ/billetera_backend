@@ -3,12 +3,13 @@ import { RequestConUsuario } from '../middlewares/auth.middleware';
 import { ObtenerBilleteraUseCase } from '../../../application/use-cases/obtener-wallet.use-case';
 import { DepositarDineroUseCase } from '../../../application/use-cases/depositar-dinero.use-case';
 import { TransferirDineroUseCase } from '../../../application/use-cases/transferir-dinero.use-case';
-
+import { ObtenerHistorialUseCase } from '../../../application/use-cases/obtener-historial.use-case';
 export class BilleteraController {
   
   constructor(private obtenerBilleteraUseCase: ObtenerBilleteraUseCase,
               private depositarDineroUseCase: DepositarDineroUseCase,
-              private transferirDineroUseCase: TransferirDineroUseCase
+              private transferirDineroUseCase: TransferirDineroUseCase,
+              private obtenerHistorialUseCase: ObtenerHistorialUseCase
   ) {}
 
   public obtenerMiBilletera = async (req: RequestConUsuario, res: Response): Promise<void> => {
@@ -99,6 +100,20 @@ public transferir = async (req: RequestConUsuario, res: Response): Promise<void>
       res.status(400).json({ success: false, error: error.message });
     }
   };
+
+public obtenerHistorial = async (req: RequestConUsuario, res: Response): Promise<void> => {
+  try {
+    const usuarioId = req.usuario?.usuarioId;
+    const historial = await this.obtenerHistorialUseCase.ejecutar(usuarioId!);
+    
+    // Aquí le devuelvo al usuario su "diario" de movimientos.
+    res.status(200).json({ success: true, data: historial });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+
 }
 
 

@@ -8,24 +8,25 @@ generator client {
 }
 
 model Usuario {
-  id               Int            @id @default(autoincrement())
-  nombre           String
-  email            String         @unique
-  password         String
-  creadoEn         DateTime       @default(now()) @map("creado_en")
-  cuenta           Cuenta?
+  id          Int          @id @default(autoincrement())
+  nombre      String
+  email       String       @unique
+  password    String
+  creadoEn    DateTime     @default(now()) @map("creado_en")
+  cuenta      Cuenta?
+  movimientos Movimiento[]
 
   @@map("usuarios")
 }
 
 model Cuenta {
-  id                  Int            @id @default(autoincrement())
-  numeroCuenta        String         @unique @map("numero_cuenta")
-  saldo               Decimal        @db.Decimal(15, 2) @default(0.00)
-  usuarioId           Int            @unique @map("usuario_id")
-  usuario             Usuario        @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
-  transaccionesEnvia  Transaccion[]  @relation("Envios")
-  transaccionesRecibe Transaccion[]  @relation("Recepciones")
+  id                  Int           @id @default(autoincrement())
+  numeroCuenta        String        @unique @map("numero_cuenta")
+  saldo               Decimal       @default(0.00) @db.Decimal(15, 2)
+  usuarioId           Int           @unique @map("usuario_id")
+  usuario             Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  transaccionesEnvia  Transaccion[] @relation("Envios")
+  transaccionesRecibe Transaccion[] @relation("Recepciones")
 
   @@map("cuentas")
 }
@@ -42,4 +43,13 @@ model Transaccion {
   cuentaDestino Cuenta @relation("Recepciones", fields: [cuentaDestinoId], references: [id])
 
   @@map("transacciones")
+}
+
+model Movimiento {
+  id        Int      @id @default(autoincrement())
+  monto     Decimal
+  tipo      String
+  fecha     DateTime @default(now())
+  usuarioId Int      @map("usuario_id")
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
 }

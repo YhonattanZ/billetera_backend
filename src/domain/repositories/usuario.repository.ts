@@ -1,4 +1,4 @@
-import { Usuario } from '@prisma/client';
+
 
 // Definimos qué datos necesitamos estrictamente para registrar
 export interface IRegistroInput {
@@ -8,9 +8,10 @@ export interface IRegistroInput {
 }
 
 export interface IUsuarioRepository {
-  crear(datos: IRegistroInput): Promise<Usuario>;
-  findByEmail(email: string): Promise<Usuario | null>;
-  findById(id: number): Promise<Usuario | null>;
-  actualizarSaldo(usuarioId: number, montoASumar: number): Promise<number>;
-  realizarTransferencia(remitenteId: number, destinatarioId: number, monto: number): Promise<{ saldoRestante: number; destinatario: string }>;
+  findById(id: number): Promise<any>;
+  actualizarSaldo(usuarioId: number, monto: number): Promise<number>;
+  realizarTransferencia(remitenteId: number, destinatarioId: number, monto: number): Promise<any>;
+  obtenerMovimientos(usuarioId: number): Promise<any[]>;
+  
+
 }

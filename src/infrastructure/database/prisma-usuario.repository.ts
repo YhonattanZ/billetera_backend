@@ -1,7 +1,8 @@
-import { PrismaClient, Usuario } from '@prisma/client';
-import { IUsuarioRepository, IRegistroInput } from '../../domain/repositories/usuario.repository';
+import { PrismaClient, Prisma } from '@prisma/client';
+import { IUsuarioRepository } from '../../domain/repositories/usuario.repository';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import dotenv from 'dotenv';
+
 
 // 1. Nos aseguramos de que el entorno esté cargado antes de instanciar
 dotenv.config();
@@ -13,6 +14,7 @@ const databaseUrl = process.env.DATABASE_URL!.replace('mysql://', 'mariadb://');
 const adapter = new PrismaMariaDb(databaseUrl);
 
 const prisma = new PrismaClient({ adapter });
+
 
 export class PrismaUsuarioRepository implements IUsuarioRepository {
   
@@ -74,8 +76,9 @@ async findById(id: number) {
 
     return nuevoSaldo;
   }
-async realizarTransferencia(remitenteId: number, destinatarioId: number, monto: number) {
+public async realizarTransferencia(remitenteId: number, destinatarioId: number, monto: number) {
     // 🛡️ INICIA LA BURBUJA ACID (Cualquier 'throw Error' aquí dentro echa hacia atrás todo lo que haya cambiado)
+    
     return await prisma.$transaction(async (tx) => {
       
       // 1. Buscamos al remitente (con 'tx')
@@ -114,12 +117,45 @@ async realizarTransferencia(remitenteId: number, destinatarioId: number, monto: 
         data: { saldo: String(nuevoSaldoDestinatario) }
       });
 
+    if (monto > 0) {
+      await this.registrarMovimiento(tx, remitenteId, monto, 'TRANSFERENCIA_ENVIADA');
+      await this.registrarMovimiento(tx, destinatarioId, monto, 'TRANSFERENCIA_RECIBIDA');
+    }
+    
       // Si llegamos a esta línea sin errores, Prisma hace el "COMMIT" definitivo en la base de datos
       return {
+        
         saldoRestante: nuevoSaldoRemitente,
         destinatario: destinatario.nombre
       };
+
+      
     });
   }
-  
+
+private async registrarMovimiento(
+  tx: any, 
+  usuarioId: number, 
+  monto: number, 
+  tipo: string
+) {
+  // Depuración rápida: veamos si están llegando los datos
+  console.log(`DEBUG: Registrando movimiento para ${usuarioId} de ${monto} tipo ${tipo}`);
+
+  await (tx.movimiento || prisma.movimiento).create({
+    data: { 
+      usuarioId: Number(usuarioId), // Forzamos a número
+      monto: monto.toString(),      // Prisma espera Decimal, String es seguro
+      tipo: tipo 
+    }
+  });
+}
+
+async obtenerMovimientos(usuarioId: number) {
+    // Aquí busco todos los movimientos de este usuario, del más nuevo al más antiguo.
+    return await prisma.movimiento.findMany({
+        where: { usuarioId },
+        orderBy: { fecha: 'desc' }
+    });
+}
 }
