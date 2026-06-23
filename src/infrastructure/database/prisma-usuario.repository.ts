@@ -16,12 +16,20 @@ const prisma = new PrismaClient({ adapter });
 
 export class PrismaUsuarioRepository implements IUsuarioRepository {
   
+  
   async findByEmail(email: string) {
     return await prisma.usuario.findUnique({
       where: { email }
     });
   }
 
+async findById(id: number) {
+  return await prisma.usuario.findUnique({
+    where: { id },
+    include: { cuenta: true } // <-- ¡Crucial para que nos devuelva el saldo y el número de cuenta!
+  });
+}
+  
   async crear(datos: any) {
     // IMPORTANTE: Asegúrate de que todo tenga 'await' para que no deje la conexión colgada
     return await prisma.usuario.create({
@@ -41,4 +49,6 @@ export class PrismaUsuarioRepository implements IUsuarioRepository {
       }
     });
   }
+
+  
 }
