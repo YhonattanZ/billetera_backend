@@ -74,6 +74,52 @@ async findById(id: number) {
 
     return nuevoSaldo;
   }
+async realizarTransferencia(remitenteId: number, destinatarioId: number, monto: number) {
+    // 🛡️ INICIA LA BURBUJA ACID (Cualquier 'throw Error' aquí dentro echa hacia atrás todo lo que haya cambiado)
+    return await prisma.$transaction(async (tx) => {
+      
+      // 1. Buscamos al remitente (con 'tx')
+      const remitente = await tx.usuario.findUnique({
+        where: { id: remitenteId },
+        include: { cuenta: true }
+      });
 
+      if (!remitente || !remitente.cuenta) throw new Error('La cuenta de origen no existe');
+
+      const saldoRemitente = Number(remitente.cuenta.saldo);
+      if (saldoRemitente < monto) {
+        throw new Error(`Fondos insuficientes. Tienes $${saldoRemitente} e intentas enviar $${monto}`);
+      }
+
+      // 2. Buscamos al destinatario (con 'tx')
+      const destinatario = await tx.usuario.findUnique({
+        where: { id: destinatarioId },
+        include: { cuenta: true }
+      });
+
+      if (!destinatario || !destinatario.cuenta) throw new Error('La cuenta de destino no existe en el banco');
+
+      // 3. Le quitamos el dinero a Luna
+      const nuevoSaldoRemitente = saldoRemitente - monto;
+      await tx.cuenta.update({
+        where: { id: remitente.cuenta.id },
+        data: { saldo: String(nuevoSaldoRemitente) }
+      });
+
+      // 4. Se lo ponemos a Víctor
+      const saldoDestinatario = Number(destinatario.cuenta.saldo);
+      const nuevoSaldoDestinatario = saldoDestinatario + monto;
+      await tx.cuenta.update({
+        where: { id: destinatario.cuenta.id },
+        data: { saldo: String(nuevoSaldoDestinatario) }
+      });
+
+      // Si llegamos a esta línea sin errores, Prisma hace el "COMMIT" definitivo en la base de datos
+      return {
+        saldoRestante: nuevoSaldoRemitente,
+        destinatario: destinatario.nombre
+      };
+    });
+  }
   
 }

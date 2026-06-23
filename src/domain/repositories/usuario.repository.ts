@@ -12,4 +12,5 @@ export interface IUsuarioRepository {
   findByEmail(email: string): Promise<Usuario | null>;
   findById(id: number): Promise<Usuario | null>;
   actualizarSaldo(usuarioId: number, montoASumar: number): Promise<number>;
+  realizarTransferencia(remitenteId: number, destinatarioId: number, monto: number): Promise<{ saldoRestante: number; destinatario: string }>;
 }

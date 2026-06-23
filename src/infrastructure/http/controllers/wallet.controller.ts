@@ -2,11 +2,13 @@ import { Response } from 'express';
 import { RequestConUsuario } from '../middlewares/auth.middleware';
 import { ObtenerBilleteraUseCase } from '../../../application/use-cases/obtener-wallet.use-case';
 import { DepositarDineroUseCase } from '../../../application/use-cases/depositar-dinero.use-case';
+import { TransferirDineroUseCase } from '../../../application/use-cases/transferir-dinero.use-case';
 
 export class BilleteraController {
   
   constructor(private obtenerBilleteraUseCase: ObtenerBilleteraUseCase,
-              private depositarDineroUseCase: DepositarDineroUseCase
+              private depositarDineroUseCase: DepositarDineroUseCase,
+              private transferirDineroUseCase: TransferirDineroUseCase
   ) {}
 
   public obtenerMiBilletera = async (req: RequestConUsuario, res: Response): Promise<void> => {
@@ -61,5 +63,43 @@ public depositar = async (req: RequestConUsuario, res: Response): Promise<void> 
       res.status(400).json({ success: false, error: error.message });
     }
   };
+
+public transferir = async (req: RequestConUsuario, res: Response): Promise<void> => {
+    try {
+      const remitenteId = req.usuario?.usuarioId;
+      const { destinatarioId, monto } = req.body;
+
+      if (!remitenteId) {
+        res.status(401).json({ success: false, error: 'Usuario no autenticado' });
+        return;
+      }
+
+      if (!destinatarioId || isNaN(Number(destinatarioId))) {
+        res.status(400).json({ success: false, error: 'ID de destinatario no válido' });
+        return;
+      }
+
+      if (monto === undefined || isNaN(Number(monto))) {
+        res.status(400).json({ success: false, error: 'Debe enviar un monto numérico' });
+        return;
+      }
+
+      const resultado = await this.transferirDineroUseCase.ejecutar(
+        remitenteId, 
+        Number(destinatarioId), 
+        Number(monto)
+      );
+
+      res.status(200).json({
+        success: true,
+        message: `Transferencia de $${monto} enviada a ${resultado.destinatario}`,
+        data: resultado
+      });
+    } catch (error: any) {
+      res.status(400).json({ success: false, error: error.message });
+    }
+  };
 }
+
+
 
