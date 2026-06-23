@@ -50,5 +50,30 @@ async findById(id: number) {
     });
   }
 
+  async actualizarSaldo(usuarioId: number, montoASumar: number) {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+      include: { cuenta: true }
+    });
+
+    if (!usuario || !usuario.cuenta) {
+      throw new Error('No se encontró la cuenta bancaria del usuario');
+    }
+
+    // Convertimos a número de forma segura (sirve tanto si en Prisma es String, Float o Decimal)
+    const saldoActual = Number(usuario.cuenta.saldo);
+    const nuevoSaldo = saldoActual + montoASumar;
+
+    // Actualizamos la tabla Cuenta
+    await prisma.cuenta.update({
+      where: { id: usuario.cuenta.id },
+      data: { 
+        saldo: String(nuevoSaldo) // Lo casteamos a String por si tu DB lo guarda en texto
+      }
+    });
+
+    return nuevoSaldo;
+  }
+
   
 }
