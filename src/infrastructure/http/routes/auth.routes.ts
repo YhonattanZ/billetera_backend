@@ -1,9 +1,23 @@
 import { Router } from 'express';
+import { PrismaUsuarioRepository } from '../../database/prisma-usuario.repository';
+import { LoginUseCase } from '../../../application/use-cases/login-usuario.use-case';
+import { AuthController } from '../controllers/auth.controller';
 import { UsuarioController } from '../controllers/usuario.controller';
 
-const router = Router();
+const authRouter = Router();
+
+// 1. Instanciamos las capas (Inyección de dependencias)
+const usuarioRepository = new PrismaUsuarioRepository();
+const loginUseCase = new LoginUseCase(usuarioRepository);
+const authController = new AuthController(loginUseCase);
 const usuarioController = new UsuarioController();
 
-router.post('/register', usuarioController.registrar.bind(usuarioController));
+// 2. Definimos el endpoint POST /auth/login
+// Usamos .bind para no perder el contexto de 'this' dentro del controlador
+authRouter.post('/login', authController.login.bind(authController));
+authRouter.post('/register', usuarioController.registrar.bind(usuarioController));
 
-export default router;
+
+
+
+export default authRouter;

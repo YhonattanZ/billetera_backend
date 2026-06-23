@@ -22,7 +22,7 @@ export class UsuarioController {
         return;
       }
 
-      console.log('⚙️ Enviando datos limpios al Caso de Uso...', { nombre, email });
+      console.log('⚙️ Enviando datos limpios al Caso de Uso...', { nombre, email , password: password });
       
       // Ejecutamos y esperamos con un timeout controlado en el código para que no muera a los 20s
       const nuevoUsuario = await registrarUsuarioUseCase.ejecutar({ nombre, email, password });

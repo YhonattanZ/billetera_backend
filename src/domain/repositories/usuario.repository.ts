@@ -9,5 +9,5 @@ export interface IRegistroInput {
 
 export interface IUsuarioRepository {
   crear(datos: IRegistroInput): Promise<Usuario>;
-  buscarPorEmail(email: string): Promise<Usuario | null>;
+  findByEmail(email: string): Promise<Usuario | null>;
 }

@@ -1,4 +1,4 @@
-import { IUsuarioRepository, IRegistroInput } from '../../domain/usuario.repository';
+import { IUsuarioRepository, IRegistroInput } from '../../domain/repositories/usuario.repository';
 import bcrypt from 'bcrypt';
 import { Usuario } from '@prisma/client';
 
@@ -8,7 +8,7 @@ export class RegistrarUsuarioUseCase {
 
   public async ejecutar(input: IRegistroInput): Promise<Usuario> {
     // 1. Validar si el email ya existe
-    const existeUsuario = await this.usuarioRepository.buscarPorEmail(input.email);
+    const existeUsuario = await this.usuarioRepository.findByEmail(input.email);
     if (existeUsuario) {
       throw new Error('El correo electrónico ya se encuentra registrado');
     }
