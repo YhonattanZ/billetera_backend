@@ -1,5 +1,5 @@
 import { IUsuarioRepository, IRegistroInput } from '../../domain/repositories/usuario.repository';
-import bcrypt from 'bcrypt';
+import { AuthService } from '../../infrastructure/config/auth-service';
 import { Usuario } from '@prisma/client';
 
 export class RegistrarUsuarioUseCase {
@@ -12,16 +12,12 @@ export class RegistrarUsuarioUseCase {
     if (existeUsuario) {
       throw new Error('El correo electrónico ya se encuentra registrado');
     }
-
-    // 2. Aplicar Hashing + Salting a la contraseña 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(input.password, saltRounds);
-
+  const passwordHasheada = await AuthService.encriptarPassword(input.password);
     // 3. Guardar en la base de datos mediante el repositorio
     const nuevoUsuario = await this.usuarioRepository.crear({
       nombre: input.nombre,
       email: input.email,
-      password: hashedPassword // Guardamos el hash
+      password: passwordHasheada // Guardamos el hash
     });
 
     return nuevoUsuario;

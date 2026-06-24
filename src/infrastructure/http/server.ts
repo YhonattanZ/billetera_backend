@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import authRoutes from './routes/auth.routes';
 import billeteraRoutes from './routes/wallet.routes';
+import { errorHandler } from './middlewares/error.middleware';
 
 export class Server {
   private app: Application;
@@ -22,6 +23,7 @@ export class Server {
     
     this.app.use('/api/auth', authRoutes);
     this.app.use('/api/wallet', billeteraRoutes); // Asegúrate de importar billeteraRoutes desde su archivo correspondiente
+    
     // Endpoint de salud mudado a su capa correspondiente
     this.app.get('/api/health', (req, res) => {
       res.status(200).json({
@@ -30,6 +32,7 @@ export class Server {
         timestamp: new Date()
       });
     });
+    this.app.use(errorHandler);
   }
 
   public start() {
