@@ -72,8 +72,10 @@ async findById(id: number) {
       data: { 
         saldo: String(nuevoSaldo) // Lo casteamos a String por si tu DB lo guarda en texto
       }
+      
     });
-
+  const tipoMovimiento = montoASumar > 0 ? 'DEPOSITO' : 'RETIRO';
+  await this.registrarMovimiento(prisma, usuarioId, Math.abs(montoASumar), tipoMovimiento);
     return nuevoSaldo;
   }
 public async realizarTransferencia(remitenteId: number, destinatarioId: number, monto: number) {

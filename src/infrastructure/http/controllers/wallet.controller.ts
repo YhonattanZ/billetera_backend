@@ -4,12 +4,15 @@ import { ObtenerBilleteraUseCase } from '../../../application/use-cases/obtener-
 import { DepositarDineroUseCase } from '../../../application/use-cases/depositar-dinero.use-case';
 import { TransferirDineroUseCase } from '../../../application/use-cases/transferir-dinero.use-case';
 import { ObtenerHistorialUseCase } from '../../../application/use-cases/obtener-historial.use-case';
+import { RetirarDineroUseCase } from '../../../application/use-cases/retirar-dinero.use-case';
+
 export class BilleteraController {
   
   constructor(private obtenerBilleteraUseCase: ObtenerBilleteraUseCase,
               private depositarDineroUseCase: DepositarDineroUseCase,
               private transferirDineroUseCase: TransferirDineroUseCase,
-              private obtenerHistorialUseCase: ObtenerHistorialUseCase
+              private obtenerHistorialUseCase: ObtenerHistorialUseCase,
+              private retirarDineroUseCase: RetirarDineroUseCase
   ) {}
 
   public obtenerMiBilletera = async (req: RequestConUsuario, res: Response): Promise<void> => {
@@ -113,6 +116,15 @@ public obtenerHistorial = async (req: RequestConUsuario, res: Response): Promise
   }
 };
 
+public retirar = async (req: RequestConUsuario, res: Response): Promise<void> => {
+  try {
+    const { monto } = req.body;
+    const nuevoSaldo = await this.retirarDineroUseCase.ejecutar(req.usuario!.usuarioId, monto);
+    res.status(200).json({ success: true, message: 'Retiro exitoso', nuevoSaldo });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
 
 }
 
