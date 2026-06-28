@@ -1,12 +1,14 @@
 import { Billetera } from "domain/billetera";
+import { BilleteraRepository } from "domain/repositories/billetera.repository";
 
 export class RealizarTransferencia {
   // El caso de uso orquesta la lógica
+  constructor(private repositorio: BilleteraRepository) {}
+
   async ejecutar(billeteraOrigen: Billetera, monto: number): Promise<void> {
-    // Aquí es donde aplicamos la regla de negocio que definimos en la clase Billetera
     billeteraOrigen.debitar(monto);
     
-    // Aquí luego vendrá la lógica de persistencia
-    // await this.billeteraRepository.save(billeteraOrigen);
+    // Ahora sí, llamamos al método del repositorio
+    await this.repositorio.actualizar(billeteraOrigen);
   }
 }
