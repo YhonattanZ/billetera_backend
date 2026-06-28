@@ -2,11 +2,15 @@ import express, { Application } from 'express';
 import authRoutes from './routes/auth.routes';
 import billeteraRoutes from './routes/wallet.routes';
 import { errorHandler } from './middlewares/error.middleware';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from '../docs/swagger';
+
+
 
 export class Server {
   private app: Application;
   private port: number;
-
+  
   constructor(port: number) {
     this.app = express();
     this.port = port;
@@ -14,16 +18,17 @@ export class Server {
     this.middlewares();
     this.routes();
   }
-
+  
   private middlewares() {
     this.app.use(express.json());
   }
-
+  
   private routes() {
+    
     
     this.app.use('/api/auth', authRoutes);
     this.app.use('/api/wallet', billeteraRoutes); // Asegúrate de importar billeteraRoutes desde su archivo correspondiente
-    
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     // Endpoint de salud mudado a su capa correspondiente
     this.app.get('/api/health', (req, res) => {
       res.status(200).json({

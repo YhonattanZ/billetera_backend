@@ -2,7 +2,7 @@ import { PrismaClient, Prisma } from '@prisma/client';
 import { IUsuarioRepository } from '../../domain/repositories/usuario.repository';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import dotenv from 'dotenv';
-
+import { logger } from '../../infrastructure/logging/logger';
 
 // 1. Nos aseguramos de que el entorno esté cargado antes de instanciar
 dotenv.config();
@@ -142,7 +142,7 @@ private async registrarMovimiento(
   tipo: string
 ) {
   // Depuración rápida: veamos si están llegando los datos
-  console.log(`DEBUG: Registrando movimiento para ${usuarioId} de ${monto} tipo ${tipo}`);
+  logger.info;
 
   await (tx.movimiento || prisma.movimiento).create({
     data: { 

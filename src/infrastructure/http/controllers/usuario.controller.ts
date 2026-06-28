@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { RegistrarUsuarioUseCase } from '../../../application/use-cases/registrar-usuario.use-cases';
 import { PrismaUsuarioRepository } from '../../database/prisma-usuario.repository';
+import { logger } from '../../../infrastructure/logging/logger';
 
 const usuarioRepository = new PrismaUsuarioRepository();
 const registrarUsuarioUseCase = new RegistrarUsuarioUseCase(usuarioRepository);
@@ -8,8 +9,7 @@ const registrarUsuarioUseCase = new RegistrarUsuarioUseCase(usuarioRepository);
 export class UsuarioController {
   
   public registrar = async (req: Request, res: Response): Promise<void> => {
-    console.log('📥 [POST] Cuerpo recibido en crudo:', req.body);
-
+   logger.info;
     try {
       // 🕵️‍♀️ Sanitización y mapeo explícito (Nuestro "fromJson" manual)
       const nombre = String(req.body.nombre || '').trim();
@@ -17,17 +17,17 @@ export class UsuarioController {
       const password = String(req.body.password || '');
 
       if (!nombre || !email || !password) {
-        console.log('⚠️ Validación fallida: Campos vacíos o mal codificados');
+       logger.info;
         res.status(400).json({ error: 'Campos obligatorios faltantes o inválidos' });
         return;
       }
 
-      console.log('⚙️ Enviando datos limpios al Caso de Uso...', { nombre, email , password: password });
+     logger.info;
       
       // Ejecutamos y esperamos con un timeout controlado en el código para que no muera a los 20s
       const nuevoUsuario = await registrarUsuarioUseCase.ejecutar({ nombre, email, password });
       
-      console.log('✅ Usuario creado exitosamente en el flujo');
+     logger.info;
       
       const { password: _, ...usuarioSeguro } = nuevoUsuario;
       res.status(201).json({ success: true, data: usuarioSeguro });

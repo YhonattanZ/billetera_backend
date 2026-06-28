@@ -8,6 +8,7 @@ import { TransferirDineroUseCase } from '../../../application/use-cases/transfer
 import { ObtenerHistorialUseCase } from '../../../application/use-cases/obtener-historial.use-case';
 import { RetirarDineroUseCase } from '../../../application/use-cases/retirar-dinero.use-case';
 
+
 const billeteraRouter = Router();
 
 const repositorio = new PrismaUsuarioRepository();
@@ -19,10 +20,64 @@ const retirarDineroUC = new RetirarDineroUseCase(repositorio);
 
 const controlador = new BilleteraController(obtenerBilleteraUC, depositarDineroUC, transferirDineroUC, obtenerHistorialUC, retirarDineroUC);
 // EL CANDADO ESTÁ AQUÍ: Petición -> verificarToken -> controlador.obtenerMiBilletera
+
+/**
+ * @openapi
+ * /api/wallet/me:
+ * get:
+ * summary: Obtener billetera
+ * responses:
+ * 200:
+ * description: Billetera obtenida exitosamente
+ */
 billeteraRouter.get('/me', verificarToken, controlador.obtenerMiBilletera.bind(controlador));
+
+/**
+ * @openapi
+ * /api/wallet/depositar:
+ * post:
+ * summary: Depositar dinero   
+ * responses:
+ * 200:
+ * description: Depósito exitoso
+ */
 billeteraRouter.post('/depositar', verificarToken, controlador.depositar.bind(controlador));
+
+
+
+
+/**
+ * @openapi
+ * /api/wallet/transfer:
+ * post:
+ * summary: Transferir dinero   
+ * responses:
+ * 200:
+ * description: Transferencia exitosa
+ */
 billeteraRouter.post('/transfer', verificarToken, controlador.transferir.bind(controlador));
+
+/**
+ * @openapi
+ * /api/wallet/history:
+ * get:
+ * summary: Obtener historial
+ * responses:
+ * 200:
+ * description: Exito
+ */
 billeteraRouter.get('/history', verificarToken, controlador.obtenerHistorial.bind(controlador));
+
+
+/**
+ * @openapi
+ * /api/wallet/withdraw:
+ * post:
+ * summary: Retirar dinero
+ * responses:
+ * 200:
+ * description: Exito
+ */
 billeteraRouter.post('/withdraw', verificarToken, controlador.retirar.bind(controlador));
 
 export default billeteraRouter;
